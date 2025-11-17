@@ -1,0 +1,226 @@
+import { useState } from 'react';
+import { getInitialFormData } from '../utils/helpers';
+import { companyDefaults } from '../data/jobStepTemplates';
+
+export const useSWMSManager = () => {
+  // Load saved SWMS list from localStorage
+  const [swmsList, setSwmsList] = useState(() => {
+    const saved = localStorage.getItem('swmsList');
+    return saved ? JSON.parse(saved) : [];
+  });
+
+  const [currentView, setCurrentView] = useState('list');
+  const [editingSWMS, setEditingSWMS] = useState(null);
+  const [viewingSWMS, setViewingSWMS] = useState(null);
+  const [formData, setFormData] = useState(getInitialFormData(companyDefaults));
+
+  // Save to localStorage whenever list changes
+  const saveToLocalStorage = (list) => {
+    localStorage.setItem('swmsList', JSON.stringify(list));
+  };
+
+  // SWMS CRUD operations
+  const saveSWMS = () => {
+    if (!formData.projectName || !formData.location || !formData.supervisor) {
+      alert(
+        'Please fill in all required fields (Project Name, Location, Supervisor)'
+      );
+      return false;
+    }
+
+    if (formData.jobSteps.length === 0) {
+      alert('Please add at least one job step');
+      return false;
+    }
+
+    let updatedList;
+    if (editingSWMS) {
+      updatedList = swmsList.map((swms) =>
+        swms.id === editingSWMS.id ? formData : swms
+      );
+    } else {
+      updatedList = [...swmsList, formData];
+    }
+
+    setSwmsList(updatedList);
+    saveToLocalStorage(updatedList);
+    setCurrentView('list');
+    setFormData(getInitialFormData(companyDefaults));
+    setEditingSWMS(null);
+    return true;
+  };
+
+  const deleteSWMS = (id) => {
+    if (window.confirm('Are you sure you want to delete this SWMS?')) {
+      const updatedList = swmsList.filter((swms) => swms.id !== id);
+      setSwmsList(updatedList);
+      saveToLocalStorage(updatedList);
+    }
+  };
+
+  const startEditSWMS = (swms) => {
+    setEditingSWMS(swms);
+    setFormData(swms);
+    setCurrentView('form');
+  };
+
+  const startNewSWMS = () => {
+    setEditingSWMS(null);
+    setFormData(getInitialFormData(companyDefaults));
+    setCurrentView('form');
+  };
+
+  const viewSWMS = (swms) => {
+    setViewingSWMS(swms);
+    setCurrentView('view');
+  };
+
+  const cancelForm = () => {
+    setCurrentView('list');
+    setFormData(getInitialFormData(companyDefaults));
+    setEditingSWMS(null);
+  };
+
+  // Job Steps operations
+  const addJobStepFromTemplate = (templateKey, template) => {
+    const newStep = {
+      id: Date.now(),
+      name: template.name,
+      preparation: template.preparation,
+      hazards: template.hazards,
+      initialRisk: template.initialRisk,
+      controls: template.controls,
+      residualRisk: template.residualRisk,
+      responsible: template.responsible,
+    };
+    setFormData({
+      ...formData,
+      jobSteps: [...formData.jobSteps, newStep],
+    });
+  };
+
+  const addMultipleJobStepsFromTemplates = (templateKeysAndTemplates) => {
+    const newSteps = templateKeysAndTemplates.map((item, index) => ({
+      id: Date.now() + index, // Ensure unique IDs by adding index
+      name: item.template.name,
+      preparation: item.template.preparation,
+      hazards: item.template.hazards,
+      initialRisk: item.template.initialRisk,
+      controls: item.template.controls,
+      residualRisk: item.template.residualRisk,
+      responsible: item.template.responsible,
+    }));
+
+    setFormData({
+      ...formData,
+      jobSteps: [...formData.jobSteps, ...newSteps],
+    });
+  };
+
+  const addCustomJobStep = () => {
+    const newStep = {
+      id: Date.now(),
+      name: '',
+      preparation: '',
+      hazards: '',
+      initialRisk: '3',
+      controls: '',
+      residualRisk: '3',
+      responsible: '',
+    };
+    setFormData({
+      ...formData,
+      jobSteps: [...formData.jobSteps, newStep],
+    });
+  };
+
+  const updateJobStep = (id, field, value) => {
+    setFormData({
+      ...formData,
+      jobSteps: formData.jobSteps.map((step) =>
+        step.id === id ? { ...step, [field]: value } : step
+      ),
+    });
+  };
+
+  const removeJobStep = (id) => {
+    setFormData({
+      ...formData,
+      jobSteps: formData.jobSteps.filter((step) => step.id !== id),
+    });
+  };
+
+  // Sign-off operations
+  const addSignOff = () => {
+    const newSignOff = {
+      id: Date.now(),
+      name: '',
+      position: '',
+      signature: '',
+      date: new Date().toISOString().split('T')[0],
+    };
+    setFormData({
+      ...formData,
+      signOffs: [...formData.signOffs, newSignOff],
+    });
+  };
+
+  const updateSignOff = (id, field, value) => {
+    setFormData({
+      ...formData,
+      signOffs: formData.signOffs.map((signOff) =>
+        signOff.id === id ? { ...signOff, [field]: value } : signOff
+      ),
+    });
+  };
+
+  const removeSignOff = (id) => {
+    setFormData({
+      ...formData,
+      signOffs: formData.signOffs.filter((signOff) => signOff.id !== id),
+    });
+  };
+
+  // Form data updates
+  const updateFormField = (field, value) => {
+    setFormData({ ...formData, [field]: value });
+  };
+
+  const updateCompanyField = (field, value) => {
+    setFormData({
+      ...formData,
+      company: { ...formData.company, [field]: value },
+    });
+  };
+
+  return {
+    // State
+    swmsList,
+    currentView,
+    editingSWMS,
+    viewingSWMS,
+    formData,
+    // View management
+    setCurrentView,
+    startNewSWMS,
+    startEditSWMS,
+    viewSWMS,
+    cancelForm,
+    // SWMS operations
+    saveSWMS,
+    deleteSWMS,
+    // Form operations
+    updateFormField,
+    updateCompanyField,
+    // Job steps operations
+    addJobStepFromTemplate,
+    addMultipleJobStepsFromTemplates,
+    addCustomJobStep,
+    updateJobStep,
+    removeJobStep,
+    // Sign-offs operations
+    addSignOff,
+    updateSignOff,
+    removeSignOff,
+  };
+};

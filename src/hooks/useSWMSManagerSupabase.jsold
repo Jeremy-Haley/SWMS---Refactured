@@ -1,0 +1,376 @@
+import { useState, useEffect } from 'react';
+import { supabase } from '../utils/supabaseClient';
+import { getInitialFormData } from '../utils/helpers';
+import { companyDefaults } from '../data/jobStepTemplates';
+
+export const useSWMSManagerSupabase = () => {
+  const [swmsList, setSwmsList] = useState([]);
+  const [currentView, setCurrentView] = useState('list');
+  const [editingSWMS, setEditingSWMS] = useState(null);
+  const [viewingSWMS, setViewingSWMS] = useState(null);
+  const [formData, setFormData] = useState(getInitialFormData(companyDefaults));
+  const [loading, setLoading] = useState(false);
+
+  // Load SWMS list from Supabase on mount
+  useEffect(() => {
+    loadSWMSList();
+    
+    // Subscribe to real-time changes
+    const subscription = supabase
+      .channel('swms_changes')
+      .on('postgres_changes', 
+        { event: '*', schema: 'public', table: 'swms_documents' },
+        () => {
+          loadSWMSList();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, []);
+
+  const loadSWMSList = async () => {
+    setLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from('swms_documents')
+        .select('*')
+        .order('date', { ascending: false });
+
+      if (error) throw error;
+
+      // Transform Supabase data to match our format
+      const transformedData = data.map((doc) => ({
+        id: doc.id,
+        projectName: doc.project_name,
+        location: doc.location,
+        date: doc.date,
+        supervisor: doc.supervisor,
+        company: {
+          orgName: doc.company_org_name,
+          acnAbn: doc.company_acn_abn,
+          contactName: doc.company_contact_name,
+          contactNumber: doc.company_contact_number,
+          preparedBy: doc.company_prepared_by,
+        },
+        emergencyContacts: {
+          nearestPolice: doc.emergency_nearest_police,
+          policePhone: doc.emergency_police_phone,
+          nearestMedical: doc.emergency_nearest_medical,
+          medicalPhone: doc.emergency_medical_phone,
+        },
+        jobSteps: doc.job_steps || [],
+        signOffs: [], // Will be loaded separately when needed
+      }));
+
+      setSwmsList(transformedData);
+    } catch (error) {
+      console.error('Error loading SWMS list:', error);
+      alert('Error loading SWMS documents. Please check your connection.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const saveSWMS = async () => {
+    if (!formData.projectName || !formData.location || !formData.supervisor) {
+      alert('Please fill in all required fields (Project Name, Location, Supervisor)');
+      return false;
+    }
+
+    if (formData.jobSteps.length === 0) {
+      alert('Please add at least one job step');
+      return false;
+    }
+
+    setLoading(true);
+    try {
+      // Transform data for Supabase
+      const supabaseData = {
+        project_name: formData.projectName,
+        location: formData.location,
+        date: formData.date,
+        supervisor: formData.supervisor,
+        company_org_name: formData.company.orgName,
+        company_acn_abn: formData.company.acnAbn,
+        company_contact_name: formData.company.contactName || null,
+        company_contact_number: formData.company.contactNumber || null,
+        company_prepared_by: formData.company.preparedBy || null,
+        emergency_nearest_police: formData.emergencyContacts?.nearestPolice || null,
+        emergency_police_phone: formData.emergencyContacts?.policePhone || null,
+        emergency_nearest_medical: formData.emergencyContacts?.nearestMedical || null,
+        emergency_medical_phone: formData.emergencyContacts?.medicalPhone || null,
+        job_steps: formData.jobSteps,
+      };
+
+      if (editingSWMS) {
+        // Update existing
+        const { error } = await supabase
+          .from('swms_documents')
+          .update(supabaseData)
+          .eq('id', editingSWMS.id);
+
+        if (error) throw error;
+      } else {
+        // Insert new
+        const { data, error } = await supabase
+          .from('swms_documents')
+          .insert([supabaseData])
+          .select()
+          .single();
+
+        if (error) throw error;
+
+        // Update formData with the new ID so QR code works
+        setFormData({ ...formData, id: data.id });
+      }
+
+      await loadSWMSList();
+      setCurrentView('list');
+      setFormData(getInitialFormData(companyDefaults));
+      setEditingSWMS(null);
+      return true;
+    } catch (error) {
+      console.error('Error saving SWMS:', error);
+      alert('Error saving SWMS document. Please try again.');
+      return false;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const deleteSWMS = async (id) => {
+    if (!window.confirm('Are you sure you want to delete this SWMS?')) {
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const { error } = await supabase
+        .from('swms_documents')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+
+      await loadSWMSList();
+    } catch (error) {
+      console.error('Error deleting SWMS:', error);
+      alert('Error deleting SWMS document. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const startEditSWMS = async (swms) => {
+    setLoading(true);
+    try {
+      // Load sign-offs for this SWMS
+      const { data: signoffs, error } = await supabase
+        .from('swms_signoffs')
+        .select('*')
+        .eq('swms_id', swms.id)
+        .order('signed_at', { ascending: false });
+
+      if (error) throw error;
+
+      const transformedSignoffs = signoffs.map((s) => ({
+        id: s.id,
+        name: s.worker_name,
+        position: s.worker_position,
+        date: new Date(s.signed_at).toISOString().split('T')[0],
+        signatureData: s.signature_data,
+      }));
+
+      setEditingSWMS({ ...swms, signOffs: transformedSignoffs });
+      setFormData({ ...swms, signOffs: transformedSignoffs });
+      setCurrentView('form');
+    } catch (error) {
+      console.error('Error loading SWMS for editing:', error);
+      alert('Error loading SWMS document. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const startNewSWMS = () => {
+    setEditingSWMS(null);
+    setFormData(getInitialFormData(companyDefaults));
+    setCurrentView('form');
+  };
+
+  const viewSWMS = (swms) => {
+    setViewingSWMS(swms);
+    setCurrentView('view');
+  };
+
+  const cancelForm = () => {
+    setCurrentView('list');
+    setFormData(getInitialFormData(companyDefaults));
+    setEditingSWMS(null);
+  };
+
+  // Job Steps operations (same as before, working with formData)
+  const addJobStepFromTemplate = (templateKey, template) => {
+    const newStep = {
+      id: Date.now(),
+      name: template.name,
+      preparation: template.preparation,
+      hazards: template.hazards,
+      initialRisk: template.initialRisk,
+      controls: template.controls,
+      residualRisk: template.residualRisk,
+      responsible: template.responsible,
+    };
+    setFormData({
+      ...formData,
+      jobSteps: [...formData.jobSteps, newStep],
+    });
+  };
+
+  const addMultipleJobStepsFromTemplates = (templateKeysAndTemplates) => {
+    const newSteps = templateKeysAndTemplates.map((item, index) => ({
+      id: Date.now() + index,
+      name: item.template.name,
+      preparation: item.template.preparation,
+      hazards: item.template.hazards,
+      initialRisk: item.template.initialRisk,
+      controls: item.template.controls,
+      residualRisk: item.template.residualRisk,
+      responsible: item.template.responsible,
+    }));
+    
+    setFormData({
+      ...formData,
+      jobSteps: [...formData.jobSteps, ...newSteps],
+    });
+  };
+
+  const addCustomJobStep = () => {
+    const newStep = {
+      id: Date.now(),
+      name: '',
+      preparation: '',
+      hazards: '',
+      initialRisk: '3',
+      controls: '',
+      residualRisk: '3',
+      responsible: '',
+    };
+    setFormData({
+      ...formData,
+      jobSteps: [...formData.jobSteps, newStep],
+    });
+  };
+
+  const updateJobStep = (id, field, value) => {
+    setFormData({
+      ...formData,
+      jobSteps: formData.jobSteps.map((step) =>
+        step.id === id ? { ...step, [field]: value } : step
+      ),
+    });
+  };
+
+  const removeJobStep = (id) => {
+    setFormData({
+      ...formData,
+      jobSteps: formData.jobSteps.filter((step) => step.id !== id),
+    });
+  };
+
+  // Sign-off operations
+  const addSignOff = () => {
+    const newSignOff = {
+      id: Date.now(),
+      name: '',
+      position: '',
+      date: new Date().toISOString().split('T')[0],
+    };
+    setFormData({
+      ...formData,
+      signOffs: [...(formData.signOffs || []), newSignOff],
+    });
+  };
+
+  const updateSignOff = (id, field, value) => {
+    setFormData({
+      ...formData,
+      signOffs: formData.signOffs.map((signOff) =>
+        signOff.id === id ? { ...signOff, [field]: value } : signOff
+      ),
+    });
+  };
+
+  const removeSignOff = async (id) => {
+    // If it's a real Supabase sign-off, delete from database
+    if (typeof id === 'string' && id.includes('-')) {
+      setLoading(true);
+      try {
+        const { error } = await supabase
+          .from('swms_signoffs')
+          .delete()
+          .eq('id', id);
+
+        if (error) throw error;
+      } catch (error) {
+        console.error('Error removing sign-off:', error);
+        alert('Error removing sign-off. Please try again.');
+        return;
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    setFormData({
+      ...formData,
+      signOffs: (formData.signOffs || []).filter((signOff) => signOff.id !== id),
+    });
+  };
+
+  // Form data updates
+  const updateFormField = (field, value) => {
+    setFormData({ ...formData, [field]: value });
+  };
+
+  const updateCompanyField = (field, value) => {
+    setFormData({
+      ...formData,
+      company: { ...formData.company, [field]: value },
+    });
+  };
+
+  return {
+    // State
+    swmsList,
+    currentView,
+    editingSWMS,
+    viewingSWMS,
+    formData,
+    loading,
+    // View management
+    setCurrentView,
+    startNewSWMS,
+    startEditSWMS,
+    viewSWMS,
+    cancelForm,
+    // SWMS operations
+    saveSWMS,
+    deleteSWMS,
+    // Form operations
+    updateFormField,
+    updateCompanyField,
+    // Job steps operations
+    addJobStepFromTemplate,
+    addMultipleJobStepsFromTemplates,
+    addCustomJobStep,
+    updateJobStep,
+    removeJobStep,
+    // Sign-offs operations
+    addSignOff,
+    updateSignOff,
+    removeSignOff,
+  };
+};
