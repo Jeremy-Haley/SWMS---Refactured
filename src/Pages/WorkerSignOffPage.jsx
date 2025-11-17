@@ -6,13 +6,13 @@ import { CheckCircle, AlertCircle } from 'lucide-react';
 export const WorkerSignOffPage = () => {
   const { swmsId } = useParams();
   const navigate = useNavigate();
-
+  
   const [swms, setSwms] = useState(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState(null);
-
+  
   const [formData, setFormData] = useState({
     workerName: '',
     workerPosition: '',
@@ -54,7 +54,7 @@ export const WorkerSignOffPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+    
     if (!formData.workerName.trim() || !formData.workerPosition.trim()) {
       setError('Please fill in all fields');
       return;
@@ -66,7 +66,7 @@ export const WorkerSignOffPage = () => {
     try {
       // Insert into the CORRECT table name: swms_signoffs
       const { error: insertError } = await supabase
-        .from('swms_signoffs') // ✅ FIXED: Correct table name
+        .from('swms_signoffs')  // ✅ FIXED: Correct table name
         .insert([
           {
             swms_id: swmsId,
@@ -79,7 +79,7 @@ export const WorkerSignOffPage = () => {
       if (insertError) throw insertError;
 
       setSuccess(true);
-
+      
       // Reset form after successful submission
       setTimeout(() => {
         setFormData({ workerName: '', workerPosition: '' });
@@ -145,21 +145,13 @@ export const WorkerSignOffPage = () => {
             boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
           }}
         >
-          <AlertCircle
-            size={64}
-            style={{ color: '#ef4444', margin: '0 auto 24px' }}
-          />
-          <h1
-            style={{
-              fontSize: '24px',
-              fontWeight: 'bold',
-              color: '#1f2937',
-              marginBottom: '16px',
-            }}
-          >
+          <AlertCircle size={64} style={{ color: '#ef4444', margin: '0 auto 24px' }} />
+          <h1 style={{ fontSize: '24px', fontWeight: 'bold', color: '#1f2937', marginBottom: '16px' }}>
             Document Not Found
           </h1>
-          <p style={{ color: '#6b7280', marginBottom: '24px' }}>{error}</p>
+          <p style={{ color: '#6b7280', marginBottom: '24px' }}>
+            {error}
+          </p>
           <button
             onClick={() => navigate('/')}
             style={{
@@ -203,23 +195,11 @@ export const WorkerSignOffPage = () => {
             boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
           }}
         >
-          <CheckCircle
-            size={64}
-            style={{ color: '#10b981', margin: '0 auto 24px' }}
-          />
-          <h1
-            style={{
-              fontSize: '28px',
-              fontWeight: 'bold',
-              color: '#1f2937',
-              marginBottom: '16px',
-            }}
-          >
+          <CheckCircle size={64} style={{ color: '#10b981', margin: '0 auto 24px' }} />
+          <h1 style={{ fontSize: '28px', fontWeight: 'bold', color: '#1f2937', marginBottom: '16px' }}>
             Sign-Off Complete! ✓
           </h1>
-          <p
-            style={{ color: '#6b7280', fontSize: '16px', marginBottom: '12px' }}
-          >
+          <p style={{ color: '#6b7280', fontSize: '16px', marginBottom: '12px' }}>
             Thank you, <strong>{formData.workerName}</strong>
           </p>
           <p style={{ color: '#6b7280', fontSize: '14px' }}>
@@ -234,13 +214,7 @@ export const WorkerSignOffPage = () => {
               border: '2px solid #3b82f6',
             }}
           >
-            <div
-              style={{
-                fontWeight: 'bold',
-                color: '#1e40af',
-                marginBottom: '8px',
-              }}
-            >
+            <div style={{ fontWeight: 'bold', color: '#1e40af', marginBottom: '8px' }}>
               {swms.projectName}
             </div>
             <div style={{ fontSize: '14px', color: '#6b7280' }}>
@@ -301,13 +275,7 @@ export const WorkerSignOffPage = () => {
             borderTopRightRadius: '12px',
           }}
         >
-          <h1
-            style={{
-              fontSize: '24px',
-              fontWeight: 'bold',
-              marginBottom: '8px',
-            }}
-          >
+          <h1 style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '8px' }}>
             SWMS Worker Sign-Off
           </h1>
           <p style={{ fontSize: '14px', opacity: 0.9 }}>
@@ -324,36 +292,16 @@ export const WorkerSignOffPage = () => {
           }}
         >
           <div style={{ marginBottom: '12px' }}>
-            <div
-              style={{
-                fontSize: '12px',
-                color: '#6b7280',
-                marginBottom: '4px',
-              }}
-            >
+            <div style={{ fontSize: '12px', color: '#6b7280', marginBottom: '4px' }}>
               Project
             </div>
-            <div
-              style={{ fontSize: '18px', fontWeight: 'bold', color: '#1f2937' }}
-            >
+            <div style={{ fontSize: '18px', fontWeight: 'bold', color: '#1f2937' }}>
               {swms.projectName}
             </div>
           </div>
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: '1fr 1fr',
-              gap: '16px',
-            }}
-          >
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
             <div>
-              <div
-                style={{
-                  fontSize: '12px',
-                  color: '#6b7280',
-                  marginBottom: '4px',
-                }}
-              >
+              <div style={{ fontSize: '12px', color: '#6b7280', marginBottom: '4px' }}>
                 Location
               </div>
               <div style={{ fontSize: '14px', color: '#1f2937' }}>
@@ -361,13 +309,7 @@ export const WorkerSignOffPage = () => {
               </div>
             </div>
             <div>
-              <div
-                style={{
-                  fontSize: '12px',
-                  color: '#6b7280',
-                  marginBottom: '4px',
-                }}
-              >
+              <div style={{ fontSize: '12px', color: '#6b7280', marginBottom: '4px' }}>
                 Supervisor
               </div>
               <div style={{ fontSize: '14px', color: '#1f2937' }}>
