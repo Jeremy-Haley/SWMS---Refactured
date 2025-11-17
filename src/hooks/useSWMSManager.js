@@ -400,7 +400,7 @@ export const useSWMSManager = () => {
       setLoading(true);
       try {
         const { error } = await supabase
-          .from('sign_offs')
+          .from('swms_signoffs')
           .delete()
           .eq('id', id);
 
