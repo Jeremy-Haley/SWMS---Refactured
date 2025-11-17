@@ -16,7 +16,7 @@ export const SWMSViewer = ({ swms, onBack, onEdit, onGenerateQRCode }) => {
   const loadSignOffs = async () => {
     try {
       const { data, error } = await supabase
-        .from('sign_offs')
+        .from('swms_signoffs')
         .select('*')
         .eq('swms_id', swms.id)
         .order('signed_at', { ascending: false });
