@@ -403,23 +403,51 @@ export const useSWMSManager = () => {
           .from('swms_signoffs')
           .delete()
           .eq('id', id);
-
+  
         if (error) throw error;
       } catch (error) {
         console.error('Error removing sign-off:', error);
         alert('Error removing sign-off. Please try again.');
+        setLoading(false);
         return;
+      }
+    }
+  
+    // Update local formData
+    const updatedSignOffs = (formData.signOffs || []).filter(
+      (signOff) => signOff.id !== id
+    );
+  
+    setFormData({
+      ...formData,
+      signOffs: updatedSignOffs,
+    });
+  
+    // 🎯 NEW: Save the updated SWMS document back to database
+    if (editingSWMS) {
+      try {
+        const { error } = await supabase
+          .from('swms_documents')
+          .update({ 
+            signoffs: updatedSignOffs,
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', editingSWMS);
+  
+        if (error) throw error;
+        
+        // Refresh the SWMS list to show updated data
+        await loadSWMSList();
+        
+      } catch (error) {
+        console.error('Error updating SWMS document:', error);
+        alert('Sign-off removed but failed to save. Please refresh the page.');
       } finally {
         setLoading(false);
       }
+    } else {
+      setLoading(false);
     }
-
-    setFormData({
-      ...formData,
-      signOffs: (formData.signOffs || []).filter(
-        (signOff) => signOff.id !== id
-      ),
-    });
   };
 
   // Form data updates
