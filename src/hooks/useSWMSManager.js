@@ -165,7 +165,7 @@ export const useSWMSManager = () => {
           console.log('Formatted sign-offs for database:', signOffsToInsert);
 
           const { error: signOffError } = await supabase
-            .from('sign_offs')
+            .from('swms_signoffs')
             .insert(signOffsToInsert);
 
           if (signOffError) {
@@ -229,7 +229,7 @@ export const useSWMSManager = () => {
     try {
       // Load sign-offs for this SWMS (using YOUR sign_offs table)
       const { data: signoffs, error } = await supabase
-        .from('sign_offs')
+        .from('swms_signoffs')
         .select('*')
         .eq('swms_id', swms.id)
         .order('signed_at', { ascending: false });
