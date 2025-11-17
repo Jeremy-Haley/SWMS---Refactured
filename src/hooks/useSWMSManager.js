@@ -405,64 +405,51 @@ export const useSWMSManager = () => {
           .eq('id', id);
   
         if (error) throw error;
+  
+        // Refresh the SWMS to get updated sign-offs from database
+        if (editingSWMS) {
+          const { data: updatedSWMS, error: fetchError } = await supabase
+            .from('swms_documents')
+            .select('*')
+            .eq('id', editingSWMS)
+            .single();
+  
+          if (fetchError) throw fetchError;
+  
+          // Fetch updated sign-offs for this SWMS
+          const { data: signOffs, error: signOffsError } = await supabase
+            .from('swms_signoffs')
+            .select('*')
+            .eq('swms_id', editingSWMS)
+            .order('signed_at', { ascending: false });
+  
+          if (signOffsError) throw signOffsError;
+  
+          // Update formData with fresh data from database
+          setFormData({
+            ...formData,
+            signOffs: signOffs || [],
+          });
+  
+          // Also refresh the main SWMS list
+          await loadSWMSList();
+        }
+        
       } catch (error) {
         console.error('Error removing sign-off:', error);
         alert('Error removing sign-off. Please try again.');
-        setLoading(false);
-        return;
-      }
-    }
-  
-    // Update local formData
-    const updatedSignOffs = (formData.signOffs || []).filter(
-      (signOff) => signOff.id !== id
-    );
-  
-    setFormData({
-      ...formData,
-      signOffs: updatedSignOffs,
-    });
-  
-    // 🎯 NEW: Save the updated SWMS document back to database
-    if (editingSWMS) {
-      try {
-        const { error } = await supabase
-          .from('swms_documents')
-          .update({ 
-            signoffs: updatedSignOffs,
-            updated_at: new Date().toISOString()
-          })
-          .eq('id', editingSWMS);
-  
-        if (error) throw error;
-        
-        // Refresh the SWMS list to show updated data
-        await loadSWMSList();
-        
-      } catch (error) {
-        console.error('Error updating SWMS document:', error);
-        alert('Sign-off removed but failed to save. Please refresh the page.');
       } finally {
         setLoading(false);
       }
     } else {
-      setLoading(false);
+      // For local (non-database) sign-offs, just filter them out
+      setFormData({
+        ...formData,
+        signOffs: (formData.signOffs || []).filter(
+          (signOff) => signOff.id !== id
+        ),
+      });
     }
-  };
-
-  // Form data updates
-  const updateFormField = (field, value) => {
-    setFormData((prevFormData) => ({
-      ...prevFormData,
-      [field]: value,
-    }));
-  };
-
-  const updateCompanyField = (field, value) => {
-    setFormData((prevFormData) => ({
-      ...prevFormData,
-      company: { ...prevFormData.company, [field]: value },
-    }));
   };
 
   return {
