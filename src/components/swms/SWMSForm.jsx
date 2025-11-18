@@ -318,6 +318,42 @@ export const SWMSForm = ({
           />
           Emergency Contacts
         </h3>
+        
+{/* Claude Helper Tip */}
+<div
+  style={{
+    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+    color: 'white',
+    padding: '16px 20px',
+    borderRadius: '8px',
+    marginBottom: '16px',
+    border: '2px solid #5a67d8',
+    boxShadow: '0 4px 6px rgba(102, 126, 234, 0.2)',
+  }}
+>
+  <div style={{ display: 'flex', alignItems: 'start', gap: '12px' }}>
+    <div style={{ fontSize: '24px', flexShrink: 0 }}>💡</div>
+    <div>
+      <div style={{ fontWeight: 'bold', fontSize: '15px', marginBottom: '8px' }}>
+        Need help finding emergency contacts?
+      </div>
+      <div style={{ fontSize: '14px', lineHeight: '1.6', opacity: 0.95 }}>
+        Ask Claude to search for you! Just say:<br />
+        <span style={{ 
+          background: 'rgba(255,255,255,0.2)', 
+          padding: '4px 8px', 
+          borderRadius: '4px',
+          display: 'inline-block',
+          marginTop: '6px',
+          fontFamily: 'monospace',
+          fontSize: '13px'
+        }}>
+          "Claude, find emergency services near {formData.location || '[your location]'}"
+        </span>
+      </div>
+    </div>
+  </div>
+</div>
 
         {/* Prominent Emergency Number */}
         <div
