@@ -267,18 +267,16 @@ export const SWMSViewer = ({ swms, onBack, onEdit, onGenerateQRCode }) => {
                 <div style={{ fontSize: '16px' }}>{swms.date}</div>
               </div>
               <div>
-                <div
-                  style={{
-                    fontSize: '12px',
-                    color: '#6b7280',
-                    marginBottom: '4px',
-                    fontWeight: '600',
-                  }}
-                >
-                  Supervisor
-                </div>
-                <div style={{ fontSize: '16px' }}>{swms.supervisor}</div>
-              </div>
+  <div style={{ fontSize: '12px', color: '#6b7280', marginBottom: '4px', fontWeight: '600' }}>
+    Supervisor
+  </div>
+  <div style={{ fontSize: '16px', fontWeight: 'bold' }}>{swms.supervisor}</div>
+  {swms.supervisorPhone && (
+    <div style={{ fontSize: '14px', color: '#3b82f6', marginTop: '4px' }}>
+      Contact: {swms.supervisorPhone}
+    </div>
+  )}
+</div>
             </div>
           </section>
 

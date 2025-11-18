@@ -156,6 +156,32 @@ export const SWMSForm = ({
           </div>
         </div>
       </div>
+{/* After the existing Supervisor field, add: */}
+
+<div>
+  <label
+    style={{
+      display: 'block',
+      marginBottom: '8px',
+      fontWeight: '600',
+    }}
+  >
+    Supervisor Contact Number
+  </label>
+  <input
+    type="tel"
+    value={formData.supervisorPhone || ''}
+    onChange={(e) => updateFormField('supervisorPhone', e.target.value)}
+    style={{
+      width: '100%',
+      padding: '10px',
+      border: '2px solid #e5e7eb',
+      borderRadius: '6px',
+      fontSize: '14px',
+    }}
+    placeholder="e.g., 0400 123 456"
+  />
+</div>
 
       {/* Company Details */}
       <div style={{ marginBottom: '24px' }}>
@@ -318,42 +344,116 @@ export const SWMSForm = ({
           />
           Emergency Contacts
         </h3>
+
+{/* Google Search Helper - Shows when location is entered */}
+{formData.location ? (
+  <div
+    style={{
+      background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+      color: 'white',
+      padding: '16px 20px',
+      borderRadius: '8px',
+      marginBottom: '16px',
+      border: '2px solid #059669',
+      boxShadow: '0 4px 6px rgba(16, 185, 129, 0.2)',
+    }}
+  >
+    <div style={{ display: 'flex', alignItems: 'start', gap: '12px' }}>
+      <div style={{ fontSize: '24px', flexShrink: 0 }}>🔍</div>
+      <div style={{ flex: 1 }}>
+        <div style={{ fontWeight: 'bold', fontSize: '15px', marginBottom: '8px' }}>
+          Quick Search for Emergency Services
+        </div>
+        <div style={{ fontSize: '13px', lineHeight: '1.6', marginBottom: '12px', opacity: 0.95 }}>
+          Click these links to find services near <strong>{formData.location}</strong>:
+        </div>
         
-{/* Claude Helper Tip */}
-<div
-  style={{
-    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-    color: 'white',
-    padding: '16px 20px',
-    borderRadius: '8px',
-    marginBottom: '16px',
-    border: '2px solid #5a67d8',
-    boxShadow: '0 4px 6px rgba(102, 126, 234, 0.2)',
-  }}
->
-  <div style={{ display: 'flex', alignItems: 'start', gap: '12px' }}>
-    <div style={{ fontSize: '24px', flexShrink: 0 }}>💡</div>
-    <div>
-      <div style={{ fontWeight: 'bold', fontSize: '15px', marginBottom: '8px' }}>
-        Need help finding emergency contacts?
-      </div>
-      <div style={{ fontSize: '14px', lineHeight: '1.6', opacity: 0.95 }}>
-        Ask Claude to search for you! Just say:<br />
-        <span style={{ 
-          background: 'rgba(255,255,255,0.2)', 
-          padding: '4px 8px', 
-          borderRadius: '4px',
-          display: 'inline-block',
-          marginTop: '6px',
-          fontFamily: 'monospace',
-          fontSize: '13px'
+        {/* Search Links */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+          <a
+            href={`https://www.google.com/search?q=police+station+near+${encodeURIComponent(formData.location)}+phone+number+address`}
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{
+              background: 'rgba(255, 255, 255, 0.25)',
+              padding: '8px 12px',
+              borderRadius: '6px',
+              color: 'white',
+              textDecoration: 'none',
+              fontSize: '13px',
+              fontWeight: '500',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              border: '1px solid rgba(255, 255, 255, 0.3)',
+              transition: 'all 0.2s',
+            }}
+            onMouseOver={(e) => {
+              e.currentTarget.style.background = 'rgba(255, 255, 255, 0.35)';
+            }}
+            onMouseOut={(e) => {
+              e.currentTarget.style.background = 'rgba(255, 255, 255, 0.25)';
+            }}
+          >
+            🚓 Search: Police Station near {formData.location}
+          </a>
+          
+          <a
+            href={`https://www.google.com/search?q=hospital+near+${encodeURIComponent(formData.location)}+phone+number+address`}
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{
+              background: 'rgba(255, 255, 255, 0.25)',
+              padding: '8px 12px',
+              borderRadius: '6px',
+              color: 'white',
+              textDecoration: 'none',
+              fontSize: '13px',
+              fontWeight: '500',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              border: '1px solid rgba(255, 255, 255, 0.3)',
+              transition: 'all 0.2s',
+            }}
+            onMouseOver={(e) => {
+              e.currentTarget.style.background = 'rgba(255, 255, 255, 0.35)';
+            }}
+            onMouseOut={(e) => {
+              e.currentTarget.style.background = 'rgba(255, 255, 255, 0.25)';
+            }}
+          >
+            🏥 Search: Hospital near {formData.location}
+          </a>
+        </div>
+        
+        <div style={{ 
+          fontSize: '12px', 
+          marginTop: '10px', 
+          opacity: 0.9,
+          fontStyle: 'italic'
         }}>
-          "Claude, find emergency services near {formData.location || '[your location]'}"
-        </span>
+          💡 Opens in new tab - Copy name, address, and phone from search results
+        </div>
       </div>
     </div>
   </div>
-</div>
+) : (
+  // Show this when no location is entered yet
+  <div
+    style={{
+      background: '#fef3c7',
+      color: '#92400e',
+      padding: '12px 16px',
+      borderRadius: '8px',
+      marginBottom: '16px',
+      border: '2px solid #fbbf24',
+      fontSize: '14px',
+    }}
+  >
+    <strong>💡 Tip:</strong> Enter a location above to get quick Google search links for emergency services
+  </div>
+)}
 
         {/* Prominent Emergency Number */}
         <div
@@ -381,37 +481,6 @@ export const SWMSForm = ({
             000
           </div>
         </div>
-
-        {/* Find Emergency Services Button */}
-        {formData.location && (
-          <div style={{ marginBottom: '16px' }}>
-            <button
-              type="button"
-              onClick={() => {
-                if (onSearchEmergencyServices) {
-                  onSearchEmergencyServices(formData.location);
-                }
-              }}
-              style={{
-                width: '100%',
-                background: '#1e40af',
-                color: 'white',
-                padding: '12px 20px',
-                borderRadius: '8px',
-                border: 'none',
-                cursor: 'pointer',
-                fontWeight: 'bold',
-                fontSize: '15px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '8px',
-              }}
-            >
-              🔍 Find Emergency Services Near "{formData.location}"
-            </button>
-          </div>
-        )}
 
         {/* Location-based services */}
         <div

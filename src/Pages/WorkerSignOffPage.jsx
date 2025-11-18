@@ -40,9 +40,10 @@ export const WorkerSignOffPage = () => {
       setSwms({
         id: data.id,
         projectName: data.project_name,
-        location: data.project_location || data.location, // Handle both column names
+        location: data.project_location || data.location,
         date: data.date,
         supervisor: data.supervisor,
+        supervisorPhone: data.supervisor_phone,
       });
     } catch (err) {
       console.error('Error loading SWMS:', err);
@@ -346,34 +347,41 @@ export const WorkerSignOffPage = () => {
               gap: '16px',
             }}
           >
-            <div>
-              <div
-                style={{
-                  fontSize: '12px',
-                  color: '#6b7280',
-                  marginBottom: '4px',
-                }}
-              >
-                Location
-              </div>
-              <div style={{ fontSize: '14px', color: '#1f2937' }}>
-                {swms.location}
-              </div>
-            </div>
-            <div>
-              <div
-                style={{
-                  fontSize: '12px',
-                  color: '#6b7280',
-                  marginBottom: '4px',
-                }}
-              >
-                Supervisor
-              </div>
-              <div style={{ fontSize: '14px', color: '#1f2937' }}>
-                {swms.supervisor}
-              </div>
-            </div>
+            <div style={{ marginBottom: '12px' }}>
+  <div
+    style={{
+      fontSize: '12px',
+      color: '#6b7280',
+      marginBottom: '4px',
+    }}
+  >
+    Location
+  </div>
+  <div style={{ fontSize: '14px', color: '#1f2937' }}>
+    {swms.location}
+  </div>
+</div>
+
+<div style={{ background: '#eff6ff', padding: '12px', borderRadius: '6px', border: '2px solid #3b82f6' }}>
+  <div
+    style={{
+      fontSize: '12px',
+      color: '#1e40af',
+      marginBottom: '6px',
+      fontWeight: '600',
+    }}
+  >
+    Site Supervisor
+  </div>
+  <div style={{ fontSize: '15px', color: '#1f2937', fontWeight: 'bold', marginBottom: '4px' }}>
+    {swms.supervisor}
+  </div>
+  {swms.supervisorPhone && (
+    <div style={{ fontSize: '14px', color: '#3b82f6' }}>
+      Contact: {swms.supervisorPhone}
+    </div>
+  )}
+</div>
           </div>
         </div>
 

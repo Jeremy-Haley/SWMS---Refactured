@@ -67,6 +67,7 @@ export const generateSWMSPDF = (swms, company, signOffs = []) => {
       ['Location', swms.location || '—'],
       ['Date', swms.date || '—'],
       ['Supervisor', swms.supervisor || '—'],
+      ['Supervisor Contact', swms.supervisorPhone || '—'],
     ],
     theme: 'grid',
     headStyles: { fillColor: [30, 64, 175], textColor: 255, fontStyle: 'bold' },
