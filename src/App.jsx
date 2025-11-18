@@ -144,8 +144,8 @@ function AppContent() {
             editingSWMS={editingSWMS}
             onSave={saveSWMS}
             onCancel={cancelForm}
-            onUpdateField={updateFormField}
-            onUpdateCompany={updateCompanyField}
+            updateFormField={updateFormField}
+            updateCompanyField={updateCompanyField}
             onOpenTemplateModal={() => setShowTemplateModal(true)}
             onUpdateJobStep={updateJobStep}
             onRemoveJobStep={removeJobStep}

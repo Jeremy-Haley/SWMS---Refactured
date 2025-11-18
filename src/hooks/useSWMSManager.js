@@ -270,9 +270,32 @@ export const useSWMSManager = () => {
     setCurrentView('form');
   };
 
-  const viewSWMS = (swms) => {
-    setViewingSWMS(swms);
-    setCurrentView('view');
+  const viewSWMS = async (swms) => {
+    setLoading(true);
+    try {
+      // Fetch fresh sign-offs from database for this SWMS
+      const { data: signOffs, error } = await supabase
+        .from('swms_signoffs')
+        .select('*')
+        .eq('swms_id', swms.id)
+        .order('signed_at', { ascending: false });
+  
+      if (error) throw error;
+  
+      // Set the SWMS with fresh sign-offs data
+      setViewingSWMS({
+        ...swms,
+        signOffs: signOffs || [],
+      });
+      setCurrentView('view');
+    } catch (error) {
+      console.error('Error loading sign-offs:', error);
+      // If there's an error, still show the SWMS but with existing data
+      setViewingSWMS(swms);
+      setCurrentView('view');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const cancelForm = () => {
@@ -395,61 +418,54 @@ export const useSWMSManager = () => {
   };
 
   const removeSignOff = async (id) => {
-    // If it's a real Supabase sign-off (UUID format), delete from database
-    if (typeof id === 'string' && id.includes('-')) {
-      setLoading(true);
-      try {
-        const { error } = await supabase
-          .from('swms_signoffs')
-          .delete()
-          .eq('id', id);
+    setLoading(true);
+    
+    try {
+      // Delete from database (all sign-offs in swms_signoffs have UUID ids)
+      const { error } = await supabase
+        .from('swms_signoffs')
+        .delete()
+        .eq('id', id);
   
-        if (error) throw error;
-  
-        // Refresh the SWMS to get updated sign-offs from database
-        if (editingSWMS) {
-          const { data: updatedSWMS, error: fetchError } = await supabase
-            .from('swms_documents')
-            .select('*')
-            .eq('id', editingSWMS)
-            .single();
-  
-          if (fetchError) throw fetchError;
-  
-          // Fetch updated sign-offs for this SWMS
-          const { data: signOffs, error: signOffsError } = await supabase
-            .from('swms_signoffs')
-            .select('*')
-            .eq('swms_id', editingSWMS)
-            .order('signed_at', { ascending: false });
-  
-          if (signOffsError) throw signOffsError;
-  
-          // Update formData with fresh data from database
-          setFormData({
-            ...formData,
-            signOffs: signOffs || [],
-          });
-  
-          // Also refresh the main SWMS list
-          await loadSWMSList();
-        }
-        
-      } catch (error) {
-        console.error('Error removing sign-off:', error);
-        alert('Error removing sign-off. Please try again.');
-      } finally {
-        setLoading(false);
+      if (error) {
+        console.error('Delete error:', error);
+        throw error;
       }
-    } else {
-      // For local (non-database) sign-offs, just filter them out
+  
+      // Update local state to remove from UI
       setFormData({
         ...formData,
         signOffs: (formData.signOffs || []).filter(
           (signOff) => signOff.id !== id
         ),
       });
+  
+      // Reload the SWMS list to get fresh data
+      await loadSWMSList();
+      
+      console.log('Sign-off deleted successfully:', id);
+      
+    } catch (error) {
+      console.error('Error removing sign-off:', error);
+      alert('Error removing sign-off. Please try again.');
+    } finally {
+      setLoading(false);
     }
+  };
+
+  // Form data updates
+  const updateFormField = (field, value) => {
+    setFormData((prevFormData) => ({
+      ...prevFormData,
+      [field]: value,
+    }));
+  };
+
+  const updateCompanyField = (field, value) => {
+    setFormData((prevFormData) => ({
+      ...prevFormData,
+      company: { ...prevFormData.company, [field]: value },
+    }));
   };
 
   return {

@@ -6,8 +6,8 @@ export const SWMSForm = ({
   editingSWMS,
   onSave,
   onCancel,
-  onUpdateField,
-  onUpdateCompany,
+  updateFormField,
+  updateCompanyField,
   onOpenTemplateModal,
   onUpdateJobStep,
   onRemoveJobStep,
@@ -70,7 +70,7 @@ export const SWMSForm = ({
             <input
               type="text"
               value={formData.projectName}
-              onChange={(e) => onUpdateField('projectName', e.target.value)}
+              onChange={(e) => updateFormField('projectName', e.target.value)}
               style={{
                 width: '100%',
                 padding: '10px',
@@ -95,7 +95,7 @@ export const SWMSForm = ({
             <input
               type="text"
               value={formData.location}
-              onChange={(e) => onUpdateField('location', e.target.value)}
+              onChange={(e) => updateFormField('location', e.target.value)}
               style={{
                 width: '100%',
                 padding: '10px',
@@ -119,7 +119,7 @@ export const SWMSForm = ({
             <input
               type="date"
               value={formData.date}
-              onChange={(e) => onUpdateField('date', e.target.value)}
+              onChange={(e) => updateFormField('date', e.target.value)}
               style={{
                 width: '100%',
                 padding: '10px',
@@ -143,7 +143,7 @@ export const SWMSForm = ({
             <input
               type="text"
               value={formData.supervisor}
-              onChange={(e) => onUpdateField('supervisor', e.target.value)}
+              onChange={(e) => updateFormField('supervisor', e.target.value)}
               style={{
                 width: '100%',
                 padding: '10px',
@@ -189,7 +189,7 @@ export const SWMSForm = ({
             <input
               type="text"
               value={formData.company.orgName}
-              onChange={(e) => onUpdateCompany('orgName', e.target.value)}
+              onChange={(e) => updateCompanyField('orgName', e.target.value)}
               style={{
                 width: '100%',
                 padding: '10px',
@@ -212,7 +212,7 @@ export const SWMSForm = ({
             <input
               type="text"
               value={formData.company.acnAbn}
-              onChange={(e) => onUpdateCompany('acnAbn', e.target.value)}
+              onChange={(e) => updateCompanyField('acnAbn', e.target.value)}
               style={{
                 width: '100%',
                 padding: '10px',
@@ -235,7 +235,7 @@ export const SWMSForm = ({
             <input
               type="text"
               value={formData.company.contactName || ''}
-              onChange={(e) => onUpdateCompany('contactName', e.target.value)}
+              onChange={(e) => updateCompanyField('contactName', e.target.value)}
               style={{
                 width: '100%',
                 padding: '10px',
@@ -259,7 +259,7 @@ export const SWMSForm = ({
             <input
               type="tel"
               value={formData.company.contactNumber || ''}
-              onChange={(e) => onUpdateCompany('contactNumber', e.target.value)}
+              onChange={(e) => updateCompanyField('contactNumber', e.target.value)}
               style={{
                 width: '100%',
                 padding: '10px',
@@ -283,7 +283,7 @@ export const SWMSForm = ({
             <input
               type="text"
               value={formData.company.preparedBy || ''}
-              onChange={(e) => onUpdateCompany('preparedBy', e.target.value)}
+              onChange={(e) => updateCompanyField('preparedBy', e.target.value)}
               style={{
                 width: '100%',
                 padding: '10px',
@@ -411,7 +411,7 @@ export const SWMSForm = ({
                 type="text"
                 value={formData.emergencyContacts?.nearestPolice || ''}
                 onChange={(e) =>
-                  onUpdateField('emergencyContacts', {
+                  updateFormField('emergencyContacts', {
                     ...formData.emergencyContacts,
                     nearestPolice: e.target.value,
                   })
@@ -445,7 +445,7 @@ export const SWMSForm = ({
                 type="text"
                 value={formData.emergencyContacts?.policePhone || ''}
                 onChange={(e) =>
-                  onUpdateField('emergencyContacts', {
+                  updateFormField('emergencyContacts', {
                     ...formData.emergencyContacts,
                     policePhone: e.target.value,
                   })
@@ -480,7 +480,7 @@ export const SWMSForm = ({
                 type="text"
                 value={formData.emergencyContacts?.nearestMedical || ''}
                 onChange={(e) =>
-                  onUpdateField('emergencyContacts', {
+                  updateFormField('emergencyContacts', {
                     ...formData.emergencyContacts,
                     nearestMedical: e.target.value,
                   })
@@ -514,7 +514,7 @@ export const SWMSForm = ({
                 type="text"
                 value={formData.emergencyContacts?.medicalPhone || ''}
                 onChange={(e) =>
-                  onUpdateField('emergencyContacts', {
+                  updateFormField('emergencyContacts', {
                     ...formData.emergencyContacts,
                     medicalPhone: e.target.value,
                   })
@@ -1078,7 +1078,7 @@ export const SWMSForm = ({
                 type="text"
                 value={formData.newSignOff?.name || ''}
                 onChange={(e) =>
-                  onUpdateField('newSignOff', {
+                  updateFormField('newSignOff', {
                     ...formData.newSignOff,
                     name: e.target.value,
                   })
@@ -1110,7 +1110,7 @@ export const SWMSForm = ({
                 type="text"
                 value={formData.newSignOff?.company || ''}
                 onChange={(e) =>
-                  onUpdateField('newSignOff', {
+                  updateFormField('newSignOff', {
                     ...formData.newSignOff,
                     company: e.target.value,
                   })
@@ -1142,7 +1142,7 @@ export const SWMSForm = ({
                 type="text"
                 value={formData.newSignOff?.position || ''}
                 onChange={(e) =>
-                  onUpdateField('newSignOff', {
+                  updateFormField('newSignOff', {
                     ...formData.newSignOff,
                     position: e.target.value,
                   })
@@ -1179,7 +1179,7 @@ export const SWMSForm = ({
               });
 
               // Clear form
-              onUpdateField('newSignOff', {
+              updateFormField('newSignOff', {
                 name: '',
                 company: '',
                 position: '',
