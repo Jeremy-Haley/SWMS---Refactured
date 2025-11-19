@@ -329,10 +329,9 @@ export const jobStepTemplates = {
 };
 
 export const companyDefaults = {
-  orgName: 'A & L Builders PTY LTD',
-  acnAbn: '95604167026',
-  address: 'PO Box 250, Paradise Point, QLD',
-  contactName: 'Alan Haley',
-  contactPosition: 'Director',
-  contactPhone: '0433381140',
+  orgName: '',
+  acnAbn: '',
+  contactName: '',
+  contactNumber: '',
+  preparedBy: '',
 };

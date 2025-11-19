@@ -275,7 +275,21 @@ return true;
 
   const startNewSWMS = () => {
     setEditingSWMS(null);
-    setFormData(getInitialFormData(companyDefaults));
+    
+    // Use company details from Settings (context) if available, otherwise use blank defaults
+    const initialData = getInitialFormData(companyDefaults);
+    
+    if (company) {
+      initialData.company = {
+        orgName: company.company_name || '',
+        acnAbn: company.acn_abn || '',
+        contactName: company.contact_name || '',
+        contactNumber: company.contact_number || '',
+        preparedBy: company.prepared_by || '',
+      };
+    }
+    
+    setFormData(initialData);
     setCurrentView('form');
   };
 
