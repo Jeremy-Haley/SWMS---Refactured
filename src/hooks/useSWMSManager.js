@@ -292,12 +292,6 @@ return true;
     setFormData(initialData);
     setCurrentView('form');
   };
-    }
-    
-    setFormData(initialData);
-    setCurrentView('form');
-  };
-
   const viewSWMS = async (swms) => {
     setLoading(true);
     try {
