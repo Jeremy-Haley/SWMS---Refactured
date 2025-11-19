@@ -16,6 +16,7 @@ export const WorkerSignOffPage = () => {
 
   const [formData, setFormData] = useState({
     workerName: '',
+    workerCompany: '',
     workerPosition: '',
   });
 
@@ -70,7 +71,7 @@ export const WorkerSignOffPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!formData.workerName.trim() || !formData.workerPosition.trim()) {
+    if (!formData.workerName.trim() || !formData.workerCompany.trim() || !formData.workerPosition.trim()) {
       setError('Please fill in all fields');
       return;
     }
@@ -86,8 +87,8 @@ export const WorkerSignOffPage = () => {
           {
             swms_id: swmsId,
             worker_name: formData.workerName,
+            worker_company: formData.workerCompany,
             worker_position: formData.workerPosition,
-            // Removed worker_company field as it's not in the database schema
           },
         ]);
 
@@ -97,7 +98,7 @@ export const WorkerSignOffPage = () => {
 
       // Reset form after successful submission
       setTimeout(() => {
-        setFormData({ workerName: '', workerPosition: '' });
+        setFormData({ workerName: '', workerCompany: '', workerPosition: '' });
         // Can optionally redirect or allow multiple sign-offs
       }, 3000);
     } catch (err) {
@@ -609,6 +610,36 @@ export const WorkerSignOffPage = () => {
                 color: '#1f2937',
               }}
             >
+            <div style={{ marginBottom: '20px' }}>
+  <label
+    style={{
+      display: 'block',
+      marginBottom: '8px',
+      fontWeight: '600',
+      fontSize: '14px',
+      color: '#1f2937',
+    }}
+  >
+    Your Company *
+  </label>
+  <input
+    type="text"
+    value={formData.workerCompany}
+    onChange={(e) =>
+      setFormData({ ...formData, workerCompany: e.target.value })
+    }
+    required
+    style={{
+      width: '100%',
+      padding: '12px',
+      border: '2px solid #e5e7eb',
+      borderRadius: '8px',
+      fontSize: '16px',
+      boxSizing: 'border-box',
+    }}
+    placeholder="e.g., ABC Construction Ltd"
+  />
+</div>  
               Your Position/Role *
             </label>
             <input
