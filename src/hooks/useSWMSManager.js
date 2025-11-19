@@ -292,6 +292,11 @@ return true;
     setFormData(initialData);
     setCurrentView('form');
   };
+    }
+    
+    setFormData(initialData);
+    setCurrentView('form');
+  };
 
   const viewSWMS = async (swms) => {
     setLoading(true);
@@ -323,7 +328,22 @@ return true;
 
   const cancelForm = () => {
     setCurrentView('list');
-    setFormData(getInitialFormData(companyDefaults));
+    
+    // Get initial form data with blank defaults
+    const initialData = getInitialFormData(companyDefaults);
+    
+    // Auto-populate company details from Settings (if available)
+    if (company) {
+      initialData.company = {
+        orgName: company.company_name || '',
+        acnAbn: company.acn_abn || '',
+        contactName: company.contact_name || '',
+        contactNumber: company.contact_number || '',
+        preparedBy: company.prepared_by || '',
+      };
+    }
+    
+    setFormData(initialData);
     setEditingSWMS(null);
   };
 
