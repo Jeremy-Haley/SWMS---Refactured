@@ -52,6 +52,7 @@ export const useSWMSManager = () => {
         activity: doc.activity,
         date: doc.date,
         supervisor: doc.supervisor,
+        supervisorPhone: doc.supervisor_phone,
         company: {
           orgName: doc.company_org_name || companyDefaults.orgName,
           acnAbn: doc.company_acn_abn || companyDefaults.acnAbn,
@@ -112,6 +113,7 @@ export const useSWMSManager = () => {
         emergency_contacts: formData.emergencyContacts || {},
         // Store company details directly for now (since company_id is null)
         company_org_name: formData.company?.orgName || null,
+        supervisor_phone: formData.supervisorPhone || null,
         company_acn_abn: formData.company?.acnAbn || null,
         company_contact_name: formData.company?.contactName || null,
         company_contact_number: formData.company?.contactNumber || null,
@@ -181,17 +183,24 @@ export const useSWMSManager = () => {
       }
 
       // Update formData with the ID so QR code works
-      setFormData({ ...formData, id: savedId });
+setFormData({ ...formData, id: savedId });
 
-      await loadSWMSList();
+await loadSWMSList();
 
-      // Don't navigate away immediately if we just saved for QR code generation
-      if (!editingSWMS) {
-        // For new documents, stay on form so user can generate QR code
-        setEditingSWMS({ ...formData, id: savedId });
-      }
+// Show success message
+if (editingSWMS) {
+  alert('✅ SWMS Updated Successfully!');
+} else {
+  alert('✅ SWMS Saved Successfully!');
+}
 
-      return true;
+// Don't navigate away immediately if we just saved for QR code generation
+if (!editingSWMS) {
+  // For new documents, stay on form so user can generate QR code
+  setEditingSWMS({ ...formData, id: savedId });
+}
+
+return true;
     } catch (error) {
       console.error('Error saving SWMS:', error);
       alert('Error saving SWMS document. Please try again.');

@@ -1,10 +1,10 @@
+// COMPLETE UPDATED QRCodeModal.jsx
+// Replace your entire QRCodeModal.jsx with this
+
 import React, { useEffect, useRef, useState } from 'react';
-import { X, Download, Printer, FileText } from 'lucide-react';
+import { X, Download, FileText } from 'lucide-react';
 import { useCompany } from '../../contexts/CompanyContext';
-import {
-  downloadQRPoster,
-  downloadQRPosterPNG,
-} from '../../utils/qrPosterGenerator';
+import { downloadQRPoster } from '../../utils/qrPosterGenerator';
 
 export const QRCodeModal = ({ show, onClose, swmsId, projectName, swms }) => {
   const qrCodeRef = useRef(null);
@@ -26,8 +26,6 @@ export const QRCodeModal = ({ show, onClose, swmsId, projectName, swms }) => {
 
   if (!show) return null;
 
-  const signOffUrl = `${window.location.origin}/sign-off/${swmsId}`;
-
   const handleDownload = () => {
     if (qrCodeRef.current) {
       const link = document.createElement('a');
@@ -35,81 +33,6 @@ export const QRCodeModal = ({ show, onClose, swmsId, projectName, swms }) => {
       link.href = qrCodeRef.current.src;
       link.click();
     }
-  };
-
-  const handlePrint = () => {
-    const printWindow = window.open('', '', 'width=600,height=600');
-    printWindow.document.write(`
-      <html>
-        <head>
-          <title>SWMS Sign-Off QR Code</title>
-          <style>
-            body {
-              font-family: Arial, sans-serif;
-              display: flex;
-              flex-direction: column;
-              align-items: center;
-              justify-content: center;
-              padding: 40px;
-            }
-            h1 {
-              font-size: 24px;
-              margin-bottom: 10px;
-              color: #1f2937;
-            }
-            h2 {
-              font-size: 18px;
-              margin-bottom: 30px;
-              color: #6b7280;
-              font-weight: normal;
-            }
-            img {
-              border: 4px solid #3b82f6;
-              border-radius: 12px;
-              padding: 20px;
-              background: white;
-            }
-            .instructions {
-              margin-top: 30px;
-              text-align: center;
-              max-width: 400px;
-            }
-            .instructions p {
-              margin: 10px 0;
-              color: #4b5563;
-            }
-            .url {
-              margin-top: 20px;
-              padding: 10px;
-              background: #f3f4f6;
-              border-radius: 6px;
-              font-size: 12px;
-              word-break: break-all;
-              color: #6b7280;
-            }
-          </style>
-        </head>
-        <body>
-          <h1>SWMS Worker Sign-Off</h1>
-          <h2>${projectName}</h2>
-          <img src="${qrCodeRef.current?.src}" alt="QR Code" />
-          <div class="instructions">
-            <p><strong>Scan this QR code to sign off on this SWMS document</strong></p>
-            <p>Workers can use their mobile phone camera to scan the code</p>
-            <div class="url">
-              Sign-off URL:<br>
-              ${signOffUrl}
-            </div>
-          </div>
-        </body>
-      </html>
-    `);
-    printWindow.document.close();
-    printWindow.focus();
-    setTimeout(() => {
-      printWindow.print();
-      printWindow.close();
-    }, 250);
   };
 
   return (
@@ -212,7 +135,7 @@ export const QRCodeModal = ({ show, onClose, swmsId, projectName, swms }) => {
               marginBottom: '12px',
             }}
           >
-            📱 Scan to Sign Off
+            Scan to Sign Off
           </h4>
           <p
             style={{
@@ -233,23 +156,7 @@ export const QRCodeModal = ({ show, onClose, swmsId, projectName, swms }) => {
             They'll be able to enter their name, position, and digitally sign
           </p>
 
-          <div
-            style={{
-              background: '#f3f4f6',
-              padding: '12px',
-              borderRadius: '8px',
-              fontSize: '12px',
-              color: '#6b7280',
-              marginBottom: '24px',
-              wordBreak: 'break-all',
-            }}
-          >
-            <strong>Sign-off URL:</strong>
-            <br />
-            {signOffUrl}
-          </div>
-
-          {/* Action Buttons */}
+          {/* Action Buttons - Symmetrical Layout */}
           <div
             style={{
               display: 'grid',
@@ -279,9 +186,13 @@ export const QRCodeModal = ({ show, onClose, swmsId, projectName, swms }) => {
               QR Code Only
             </button>
             <button
-              onClick={handlePrint}
+              onClick={() => {
+                if (qrDataURL && swms) {
+                  downloadQRPoster(qrDataURL, swms, company);
+                }
+              }}
               style={{
-                background: '#3b82f6',
+                background: '#8b5cf6',
                 color: 'white',
                 padding: '12px 24px',
                 borderRadius: '8px',
@@ -295,12 +206,12 @@ export const QRCodeModal = ({ show, onClose, swmsId, projectName, swms }) => {
                 gap: '8px',
               }}
             >
-              <Printer size={18} />
-              Print
+              <FileText size={18} />
+              PDF
             </button>
           </div>
 
-          {/* Poster Download Section */}
+          {/* Info Section */}
           <div
             style={{
               borderTop: '2px dashed #e5e7eb',
@@ -315,74 +226,17 @@ export const QRCodeModal = ({ show, onClose, swmsId, projectName, swms }) => {
                 marginBottom: '12px',
               }}
             >
-              📄 Printable Posters
+              Print QR Code
             </h4>
             <p
               style={{
                 color: '#6b7280',
                 fontSize: '13px',
-                marginBottom: '16px',
+                marginBottom: '0',
               }}
             >
-              Professional A4 posters with company branding and instructions
+              Print QR code with instructions for easy site posting
             </p>
-
-            <div
-              style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(2, 1fr)',
-                gap: '12px',
-              }}
-            >
-              <button
-                onClick={() => {
-                  if (qrDataURL && swms) {
-                    downloadQRPoster(qrDataURL, swms, company);
-                  }
-                }}
-                style={{
-                  background: '#8b5cf6',
-                  color: 'white',
-                  padding: '12px 24px',
-                  borderRadius: '8px',
-                  border: 'none',
-                  cursor: 'pointer',
-                  fontWeight: 'bold',
-                  fontSize: '14px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '8px',
-                }}
-              >
-                <FileText size={18} />
-                Poster PDF
-              </button>
-              <button
-                onClick={async () => {
-                  if (qrDataURL && swms) {
-                    await downloadQRPosterPNG(qrDataURL, swms, company);
-                  }
-                }}
-                style={{
-                  background: '#f59e0b',
-                  color: 'white',
-                  padding: '12px 24px',
-                  borderRadius: '8px',
-                  border: 'none',
-                  cursor: 'pointer',
-                  fontWeight: 'bold',
-                  fontSize: '14px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '8px',
-                }}
-              >
-                <Download size={18} />
-                Poster PNG
-              </button>
-            </div>
           </div>
         </div>
       </div>
