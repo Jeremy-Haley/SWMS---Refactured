@@ -11,6 +11,7 @@ export const WorkerSignOffPage = () => {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [showFullSWMS, setShowFullSWMS] = useState(false);
   const [error, setError] = useState(null);
 
   const [formData, setFormData] = useState({
@@ -29,14 +30,14 @@ export const WorkerSignOffPage = () => {
         .select('*')
         .eq('id', swmsId)
         .single();
-
+  
       if (error) throw error;
-
+  
       if (!data) {
         setError('SWMS document not found');
         return;
       }
-
+  
       setSwms({
         id: data.id,
         projectName: data.project_name,
@@ -44,6 +45,20 @@ export const WorkerSignOffPage = () => {
         date: data.date,
         supervisor: data.supervisor,
         supervisorPhone: data.supervisor_phone,
+        jobSteps: data.job_steps || [],
+        emergencyContacts: data.emergency_contacts || {
+          nearestPolice: '',
+          policePhone: '',
+          nearestMedical: '',
+          medicalPhone: '',
+        },
+        company: {
+          orgName: data.company_org_name,
+          acnAbn: data.company_acn_abn,
+          contactName: data.company_contact_name,
+          contactNumber: data.company_contact_number,
+          preparedBy: data.company_prepared_by,
+        },
       });
     } catch (err) {
       console.error('Error loading SWMS:', err);
@@ -52,7 +67,6 @@ export const WorkerSignOffPage = () => {
       setLoading(false);
     }
   };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -384,7 +398,174 @@ export const WorkerSignOffPage = () => {
 </div>
           </div>
         </div>
+{/* View Full SWMS Button */}
+<div style={{ padding: '24px', borderBottom: '2px solid #e5e7eb' }}>
+  <button
+    onClick={() => setShowFullSWMS(!showFullSWMS)}
+    style={{
+      width: '100%',
+      background: '#3b82f6',
+      color: 'white',
+      padding: '14px 24px',
+      borderRadius: '8px',
+      border: 'none',
+      cursor: 'pointer',
+      fontWeight: '600',
+      fontSize: '16px',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: '8px',
+    }}
+  >
+    {showFullSWMS ? '📋 Hide Full SWMS' : '📋 View Full SWMS Document'}
+  </button>
+</div>
 
+{/* Full SWMS Content - Expandable */}
+{showFullSWMS && (
+  <div
+    style={{
+      padding: '24px',
+      background: '#f9fafb',
+      borderBottom: '2px solid #e5e7eb',
+      maxHeight: '500px',
+      overflowY: 'auto',
+    }}
+  >
+    <h3
+      style={{
+        fontSize: '18px',
+        fontWeight: 'bold',
+        color: '#1f2937',
+        marginBottom: '16px',
+      }}
+    >
+      Complete SWMS Document
+    </h3>
+    
+    <div style={{ fontSize: '14px', color: '#6b7280', lineHeight: '1.6' }}>
+      <p style={{ marginBottom: '12px' }}>
+        <strong>Project:</strong> {swms.projectName}
+      </p>
+      <p style={{ marginBottom: '12px' }}>
+        <strong>Location:</strong> {swms.location}
+      </p>
+      <p style={{ marginBottom: '12px' }}>
+        <strong>Date:</strong> {swms.date}
+      </p>
+      <p style={{ marginBottom: '12px' }}>
+        <strong>Supervisor:</strong> {swms.supervisor}
+      </p>
+      {swms.supervisorPhone && (
+        <p style={{ marginBottom: '12px' }}>
+          <strong>Supervisor Contact:</strong> {swms.supervisorPhone}
+        </p>
+      )}
+      
+      {/* Job Steps */}
+      {swms.jobSteps && swms.jobSteps.length > 0 && (
+        <div style={{ marginTop: '20px' }}>
+          <h4
+            style={{
+              fontSize: '16px',
+              fontWeight: 'bold',
+              color: '#1f2937',
+              marginBottom: '12px',
+            }}
+          >
+            Job Steps & Safety Information
+          </h4>
+          {swms.jobSteps.map((step, index) => (
+            <div
+              key={index}
+              style={{
+                background: 'white',
+                padding: '16px',
+                borderRadius: '8px',
+                marginBottom: '12px',
+                border: '1px solid #e5e7eb',
+              }}
+            >
+              <div
+                style={{
+                  fontWeight: 'bold',
+                  color: '#1f2937',
+                  marginBottom: '8px',
+                }}
+              >
+                Step {index + 1}: {step.name}
+              </div>
+              {step.hazards && (
+                <p style={{ marginBottom: '6px' }}>
+                  <strong>Hazards:</strong> {step.hazards}
+                </p>
+              )}
+              {step.controls && (
+                <p style={{ marginBottom: '6px' }}>
+                  <strong>Controls:</strong> {step.controls}
+                </p>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+      
+      {/* Emergency Contacts */}
+      {swms.emergencyContacts && (
+        <div style={{ marginTop: '20px' }}>
+          <h4
+            style={{
+              fontSize: '16px',
+              fontWeight: 'bold',
+              color: '#dc2626',
+              marginBottom: '12px',
+            }}
+          >
+            Emergency Contacts
+          </h4>
+          <div
+            style={{
+              background: '#fef2f2',
+              padding: '12px',
+              borderRadius: '6px',
+              border: '2px solid #dc2626',
+              marginBottom: '8px',
+            }}
+          >
+            <div style={{ fontWeight: 'bold', fontSize: '18px', color: '#dc2626' }}>
+              Emergency: 000
+            </div>
+          </div>
+          {swms.emergencyContacts.nearestPolice && (
+            <p style={{ marginBottom: '6px' }}>
+              <strong>Police:</strong> {swms.emergencyContacts.nearestPolice} - {swms.emergencyContacts.policePhone || 'N/A'}
+            </p>
+          )}
+          {swms.emergencyContacts.nearestMedical && (
+            <p style={{ marginBottom: '6px' }}>
+              <strong>Medical:</strong> {swms.emergencyContacts.nearestMedical} - {swms.emergencyContacts.medicalPhone || 'N/A'}
+            </p>
+          )}
+        </div>
+      )}
+    </div>
+    
+    <div
+      style={{
+        marginTop: '16px',
+        padding: '12px',
+        background: '#fef3c7',
+        borderRadius: '6px',
+        border: '2px solid #f59e0b',
+        fontSize: '13px',
+        color: '#92400e',
+      }}
+    >
+      <strong>⚠️ Important:</strong> Please read all safety information above before signing off
+    </div>
+  </div>
+)}
         {/* Sign-Off Form */}
         <form onSubmit={handleSubmit} style={{ padding: '24px' }}>
           <div style={{ marginBottom: '20px' }}>
