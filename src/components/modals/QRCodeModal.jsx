@@ -14,7 +14,7 @@ export const QRCodeModal = ({ show, onClose, swmsId, projectName, swms }) => {
   useEffect(() => {
     if (show && qrCodeRef.current) {
       // Generate QR Code using a library
-      const signOffUrl = `${window.location.origin}/sign-off/${swmsId}`;
+      const signOffUrl = `https://swms-refactured.vercel.app/sign-off/${swmsId}`;
       const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=600x600&data=${encodeURIComponent(
         signOffUrl
       )}`;
