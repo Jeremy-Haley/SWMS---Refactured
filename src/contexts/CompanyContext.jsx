@@ -48,19 +48,36 @@ export const CompanyProvider = ({ children }) => {
 
   const loadCompany = async () => {
     try {
-      // Call the function to get current user's company
-      const { data, error } = await supabase.rpc('get_current_company');
-
-      if (error) throw error;
-
-      if (data && data.length > 0) {
+      // First get user's company ID and role via RPC
+      const { data: rpcData, error: rpcError } = await supabase.rpc('get_current_company');
+  
+      if (rpcError) throw rpcError;
+  
+      if (rpcData && rpcData.length > 0) {
+        const companyId = rpcData[0].company_id;
+        
+        // Then fetch COMPLETE company details directly from companies table
+        const { data: companyData, error: companyError } = await supabase
+          .from('companies')
+          .select('*')
+          .eq('id', companyId)
+          .single();
+        
+        if (companyError) throw companyError;
+        
+        // Set company with ALL fields
         setCompany({
-          id: data[0].company_id,
-          name: data[0].company_name,
-          logo: data[0].company_logo,
-          color: data[0].company_color || '#1e40af',
-          subscriptionStatus: data[0].subscription_status,
-          userRole: data[0].user_role,
+          id: companyData.id,
+          name: companyData.name,
+          logo: companyData.logo,
+          color: companyData.primary_color || '#1e40af',
+          subscriptionStatus: rpcData[0].subscription_status,
+          userRole: rpcData[0].user_role,
+          // ✅ Add all the missing fields:
+          abn: companyData.abn,
+          contact_name: companyData.contact_name,
+          contact_phone: companyData.contact_phone,
+          prepared_by: companyData.prepared_by,
         });
       }
     } catch (error) {

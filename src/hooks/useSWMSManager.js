@@ -276,15 +276,16 @@ return true;
   const startNewSWMS = () => {
     setEditingSWMS(null);
     
-    // Use company details from Settings (context) if available, otherwise use blank defaults
+    // Get initial form data with blank defaults
     const initialData = getInitialFormData(companyDefaults);
     
+    // Auto-populate company details from Settings (if available)
     if (company) {
       initialData.company = {
-        orgName: company.company_name || '',
-        acnAbn: company.acn_abn || '',
+        orgName: company.name || '',
+        acnAbn: company.abn || '',
         contactName: company.contact_name || '',
-        contactNumber: company.contact_number || '',
+        contactNumber: company.contact_phone || '',
         preparedBy: company.prepared_by || '',
       };
     }
@@ -292,6 +293,7 @@ return true;
     setFormData(initialData);
     setCurrentView('form');
   };
+  
   const viewSWMS = async (swms) => {
     setLoading(true);
     try {
@@ -329,17 +331,18 @@ return true;
     // Auto-populate company details from Settings (if available)
     if (company) {
       initialData.company = {
-        orgName: company.company_name || '',
-        acnAbn: company.acn_abn || '',
-        contactName: company.contact_name || '',
-        contactNumber: company.contact_number || '',
-        preparedBy: company.prepared_by || '',
+        orgName: company.name || '',              // ✅ name
+        acnAbn: company.abn || '',               // ✅ abn (not acn_abn)
+        contactName: company.contact_name || '', // ✅ contact_name
+        contactNumber: company.contact_phone || '', // ✅ contact_phone (not contact_number)
+        preparedBy: company.prepared_by || '',   // ✅ prepared_by
       };
     }
     
     setFormData(initialData);
     setEditingSWMS(null);
   };
+  
 
   // Job Steps operations
   const addJobStepFromTemplate = (templateKey, template) => {
